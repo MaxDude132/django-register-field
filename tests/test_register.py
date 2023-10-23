@@ -23,7 +23,7 @@ class RegisterFieldTestCase(TestCase):
         self.assertEqual(self.register.get_key("max_country"), "max_country")
 
         country_info = CountryInfo(3_000_000_000, capital="Max Capital")
-        self.register.register(country_info, db_key="max_powerful_country")
+        self.register.register(country_info, db_key="max_big_country")
 
-        self.assertEqual(self.register.get_class("max_powerful_country"), country_info)
-        self.assertEqual(self.register.get_key(country_info), "max_powerful_country")
+        self.assertEqual(self.register.get_class("max_big_country"), country_info)
+        self.assertEqual(self.register.get_key(country_info), "max_big_country")
