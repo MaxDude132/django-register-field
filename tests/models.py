@@ -18,6 +18,17 @@ class CountryChoices(RegisterChoices):
     UNITED_STATES = CountryInfo(population=331_900_000, capital="Washington")
 
 
+@dataclass(unsafe_hash=True)
+class ContinentInfo:
+    label: str
+
+
+class ContinentChoices(RegisterChoices):
+    AMERICA = ContinentInfo(label="America")
+    EUROPE = ContinentInfo(label="Europe")
+
+
 class City(models.Model):
     label = models.CharField(max_length=50)
     country = RegisterField(choices=CountryChoices.choices)
+    continent = RegisterField(choices=ContinentChoices.choices, null=True, blank=True)

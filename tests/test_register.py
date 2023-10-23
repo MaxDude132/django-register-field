@@ -27,3 +27,7 @@ class RegisterFieldTestCase(TestCase):
 
         self.assertEqual(self.register.get_class("max_big_country"), country_info)
         self.assertEqual(self.register.get_key(country_info), "max_big_country")
+
+    def test_iter(self):
+        for klass in self.register:
+            self.assertIn(klass, CountryChoices)
