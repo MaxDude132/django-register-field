@@ -1,9 +1,12 @@
+# Django
 from django.test import TestCase
-from django_register.rest_framework import RegisterField
 
-from tests.models import City, CountryChoices
-
+# Rest Framework
 from rest_framework import serializers
+
+# django_register
+from django_register.rest_framework import RegisterField
+from tests.models import City, CountryChoices
 
 
 class CitySerialier(serializers.ModelSerializer):

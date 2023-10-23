@@ -1,11 +1,13 @@
 # Standard libraries
 from typing import TYPE_CHECKING
 
+# Django
 from django.utils.translation import gettext_lazy as _
 
 # Rest Framework
 from rest_framework import serializers
 
+# django_register
 from django_register.base import Register
 
 if TYPE_CHECKING:

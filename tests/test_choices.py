@@ -1,5 +1,7 @@
+# Django
 from django.test import TestCase
 
+# django_register
 from tests.models import CountryChoices
 
 

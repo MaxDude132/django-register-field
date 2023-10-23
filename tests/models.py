@@ -1,7 +1,10 @@
-# Django
+# Standard libraries
 from dataclasses import dataclass
+
+# Django
 from django.db import models
 
+# django_register
 from django_register import RegisterChoices, RegisterField
 
 

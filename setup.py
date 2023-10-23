@@ -1,6 +1,7 @@
 # Standard libraries
 from pathlib import Path
 
+# django_register
 # drf-serializer-prefetch
 from setuptools import find_packages, setup
 

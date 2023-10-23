@@ -1,6 +1,8 @@
+# Django
 from django.test import TestCase
-from django_register.base import Register
 
+# django_register
+from django_register.base import Register
 from tests.models import CountryChoices, CountryInfo
 
 
