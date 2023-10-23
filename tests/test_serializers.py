@@ -25,3 +25,27 @@ class RegisterSerializerTestCase(TestCase):
     def test_serialization(self):
         serializer = CitySerialier(self.paris)
         self.assertEqual(serializer.data, {"label": "Paris", "country": "france"})
+
+    def test_save(self):
+        serializer = CitySerialier(
+            data={"label": "Paris", "country": CountryChoices.FRANCE}
+        )
+
+        self.assertTrue(serializer.is_valid())
+        city = serializer.save()
+
+        self.assertEqual(city.country, CountryChoices.FRANCE)
+
+    def test_wrong_field_type(self):
+        class CitySerialier(serializers.ModelSerializer):
+            label = RegisterField()
+            country = RegisterField()
+
+            class Meta:
+                model = City
+                fields = ("label", "country")
+
+        serializer = CitySerialier(self.paris)
+
+        with self.assertRaises(ValueError):
+            serializer.data
