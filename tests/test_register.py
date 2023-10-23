@@ -4,7 +4,7 @@ from django_register.base import Register
 from tests.models import CountryChoices, CountryInfo
 
 
-class RegisterFieldTestCase(TestCase):
+class RegisterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.register: Register = CountryChoices.register
