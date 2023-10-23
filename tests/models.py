@@ -5,7 +5,7 @@ from django.db import models
 from django_register import RegisterChoices, RegisterField
 
 
-@dataclass(hash=True)
+@dataclass(unsafe_hash=True)
 class CountryInfo:
     population: int
     capital: str
