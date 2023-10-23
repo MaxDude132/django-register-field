@@ -1,4 +1,4 @@
 # Local
-from .base import RegisterChoices, RegisterField
+from .base import Register, RegisterChoices, RegisterField
 
-__all__ = ["RegisterChoices", "RegisterField"]
+__all__ = ["Register", "RegisterChoices", "RegisterField"]
