@@ -101,10 +101,6 @@ class RegisterChoicesMeta(type):
         }
 
     @property
-    def all_values(cls):
-        return list(cls._all_mapping.values())
-
-    @property
     def choices(cls):
         choices = RegisterList()
 

@@ -31,3 +31,13 @@ class RegisterFieldTestCase(TestCase):
     def test_iter(self):
         for klass in self.register:
             self.assertIn(klass, CountryChoices)
+
+    def test_cannot_register_twice(self):
+        with self.assertRaises(ValueError):
+            self.register.register(CountryChoices.CANADA, db_key="max_big_country")
+
+        with self.assertRaises(ValueError):
+            self.register.register(
+                CountryInfo(population=2, capital="Some capital"),
+                db_key="canada",
+            )
