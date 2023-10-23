@@ -1,5 +1,5 @@
 # Django
-from attr import dataclass
+from dataclasses import dataclass
 from django.db import models
 
 from django_register import RegisterChoices, RegisterField
