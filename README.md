@@ -18,7 +18,7 @@ There are 2 ways to implement the fields: through the RegisterChoices, or by man
 
 The implementation of the RegisterChoices is very similar to django's default Choices, but even simpler. It looks like this:
 
-''' python
+``` python
 from dataclasses import dataclass
 from django_register import RegisterChoices
 
@@ -33,18 +33,18 @@ class SomeRegisterChoices(RegisterChoices):
     OPTION_1 = MyOptions(some_field='field_name', some_description='field_description')
     OPTION_2 = MyOptions(some_field='field_name_2', some_description='field_description_2')
 
-'''
+```
 
 `SomeRegisterChoices` is now usable in a RegisterField on a model:
 
-''' python
+``` python
 from django_register import RegisterField
 
 
 class SomeModel(models.Model):
     my_field = RegisterField(choices=SomeRegisterChoices.choices)
 
-'''
+```
 
 Note that the objects passed to RegisterChoices must be hashable. This is because the register keeps track of the relationship between the label and the object in both directions, so the object needs to be usable as a key in a dictionary.
 
@@ -56,29 +56,30 @@ In the background, the RegisterChoices takes care of setting and handling the Re
 
 To set the register manually, you first need to instantiate a Register:
 
-''' python
+``` python
 from django_register import Register
 
 
 register = Register()
 
-'''
+```
 
 With that done, you can register objects with it in your app config's `ready` method (found in `apps.py`).:
 
-''' python
+``` python
 class SomeApp(AppConfig):
     def ready(self):
         register.register(some_object, db_key='some_label')
-'''
+```
+
 `db_key` is not required. If not set, the `label` must be set on the object, otherwise a `ValueError` is raised. You can then pass the register to the `RegisterField` directly:
 
-''' python
+``` python
 from django_register import RegisterField
 
 
 class SomeModel(models.Model):
     my_field = RegisterField(register=register)
-'''
+```
 
 Note that if using that technique, you are responsible for keeping track of your object. The `RegisterChoices` make it easier to keep your objects for comparison and use them outside of the model, but both methods will give the same results database side.
