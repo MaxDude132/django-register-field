@@ -18,7 +18,15 @@ class AdminTestCase(TestCase):
 
     def test_admin_choices(self):
         built_admin = CityAdmin(City, admin.site)
+
+        # choices was renamed to _choices in Django 5.0
+        choices = getattr(
+            built_admin.opts._forward_fields_map["available_food"],
+            "choices",
+        ) or getattr(
+            built_admin.opts._forward_fields_map["available_food"], "_choices", None
+        )
         self.assertEqual(
-            built_admin.opts._forward_fields_map["available_food"]._choices,
+            choices,
             [("pizza", "Pizza")],
         )

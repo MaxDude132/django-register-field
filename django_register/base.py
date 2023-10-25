@@ -73,7 +73,7 @@ class Register:
 
     @property
     def choices(self):
-        return {k: k.replace("_", " ").title() for k in self._key_to_class}
+        return [(k, k.replace("_", " ").title()) for k in self._key_to_class]
 
     def __iter__(self):
         return iter(self._key_to_class.values())
