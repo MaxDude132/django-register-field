@@ -58,3 +58,8 @@ class City(models.Model):
     car_companies = RegisterField(
         register=cars_register, null=True, blank=True, max_length=50
     )
+
+
+class Neighborhood(models.Model):
+    label = models.CharField(max_length=50)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
