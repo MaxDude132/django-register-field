@@ -1,10 +1,18 @@
 # Django
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.test import TestCase
 
 # django_register
 from django_register.base import RegisterField
-from tests.models import CountryInfo, cars_register, CarCompanies, City, CountryChoices
+from tests.models import (
+    CountryInfo,
+    Neighborhood,
+    cars_register,
+    CarCompanies,
+    City,
+    CountryChoices,
+)
 
 
 class RegisterFieldTestCase(TestCase):
@@ -83,3 +91,19 @@ class RegisterFieldTestCase(TestCase):
 
         cars_register._class_to_key.pop(hyundai_car)
         cars_register._key_to_class.pop("hyundai")
+
+    def test_annotations(self):
+        Neighborhood.objects.create(label="Montparnasse", city=self.paris)
+
+        neighborhood = Neighborhood.objects.annotate(
+            country=models.F("city__country")
+        ).first()
+
+        self.assertNotEqual(
+            neighborhood.country,
+            "france",
+        )
+        self.assertEqual(
+            neighborhood.country,
+            CountryChoices.FRANCE,
+        )
