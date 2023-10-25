@@ -83,22 +83,3 @@ class SomeModel(models.Model):
 ```
 
 Note that if using that technique, you are responsible for keeping track of your object. The `RegisterChoices` make it easier to keep your objects for comparison and use them outside of the model, but both methods will give the same results database side.
-
-### Using with django-rest-framework
-
-If using with rest_framework, there is a Serializer Field already built in to be used by the Serializer. You simply need to set the field as such:
-
-``` python
-from django_register.rest_framework import RegisterField
-
-
-class SomeModelSerializer(serializers.ModelSerializer):
-    some_register_field = RegisterField()
-
-    class Meta:
-        model = SomeModel
-        fields = ('some_register_field',)
-
-```
-
-Behind the scenes, the serialzier field goes and gets the register from the model field to get the work done. That's it, you're good to go!
