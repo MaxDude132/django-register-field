@@ -6,30 +6,80 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='City',
+            name="City",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('label', models.CharField(max_length=50)),
-                ('country', django_register.base.RegisterField(default='united_states', max_length=13, register=django_register.base.Register())),
-                ('continent', django_register.base.RegisterField(blank=True, max_length=7, null=True, register=django_register.base.Register())),
-                ('available_food', django_register.base.RegisterField(blank=True, max_length=5, null=True, register=django_register.base.Register())),
-                ('car_companies', django_register.base.RegisterField(blank=True, max_length=50, null=True, register=django_register.base.Register())),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("label", models.CharField(max_length=50)),
+                (
+                    "country",
+                    django_register.base.RegisterField(
+                        default="united_states",
+                        max_length=13,
+                        register=django_register.base.Register(),
+                    ),
+                ),
+                (
+                    "continent",
+                    django_register.base.RegisterField(
+                        blank=True,
+                        max_length=7,
+                        null=True,
+                        register=django_register.base.Register(),
+                    ),
+                ),
+                (
+                    "available_food",
+                    django_register.base.RegisterField(
+                        blank=True,
+                        max_length=5,
+                        null=True,
+                        register=django_register.base.Register(),
+                    ),
+                ),
+                (
+                    "car_companies",
+                    django_register.base.RegisterField(
+                        blank=True,
+                        max_length=50,
+                        null=True,
+                        register=django_register.base.Register(),
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Neighborhood',
+            name="Neighborhood",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('label', models.CharField(max_length=50)),
-                ('city', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tests.city')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("label", models.CharField(max_length=50)),
+                (
+                    "city",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.city"
+                    ),
+                ),
             ],
         ),
     ]

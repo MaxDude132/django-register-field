@@ -71,6 +71,10 @@ class Register:
         if self._key_to_class:
             return max(len(key) for key in self._key_to_class)
 
+    @property
+    def choices(self):
+        return [(k, k.replace("_", " ").title()) for k in self._key_to_class]
+
     def __iter__(self):
         return iter(self._key_to_class.values())
 
@@ -140,6 +144,9 @@ class RegisterField(models.CharField):
             if "register" in kwargs
             else kwargs["choices"].register
         )
+
+        if "choices" not in kwargs:
+            kwargs["choices"] = self.register.choices
 
         if "max_length" not in kwargs and (max_length := self.register.max_length):
             kwargs["max_length"] = max_length
