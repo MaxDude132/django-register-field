@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from django.db import models
 
 # django_register
-from django_register import RegisterChoices, RegisterField
+from django_register import Register, RegisterChoices, RegisterField
 
 
 @dataclass(unsafe_hash=True)
@@ -26,6 +26,23 @@ class ContinentInfo:
     label: str
 
 
+@dataclass(unsafe_hash=True)
+class FoodInfo:
+    verbose_name: str
+
+
+food_register = Register()
+food_register.register(FoodInfo("Pizza"), db_key="pizza")
+
+
+@dataclass(unsafe_hash=True)
+class CarCompanies:
+    verbose_name: str
+
+
+cars_register = Register()
+
+
 class ContinentChoices(RegisterChoices):
     AMERICA = ContinentInfo(label="America")
     EUROPE = ContinentInfo(label="Europe")
@@ -37,3 +54,7 @@ class City(models.Model):
         choices=CountryChoices.choices, default=CountryChoices.UNITED_STATES
     )
     continent = RegisterField(choices=ContinentChoices.choices, null=True, blank=True)
+    available_food = RegisterField(register=food_register, null=True, blank=True)
+    car_companies = RegisterField(
+        register=cars_register, null=True, blank=True, max_length=50
+    )

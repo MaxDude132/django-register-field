@@ -1,9 +1,10 @@
 # Django
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 # django_register
 from django_register.base import RegisterField
-from tests.models import City, CountryChoices
+from tests.models import CountryInfo, cars_register, CarCompanies, City, CountryChoices
 
 
 class RegisterFieldTestCase(TestCase):
@@ -47,3 +48,38 @@ class RegisterFieldTestCase(TestCase):
         city = City.objects.create(label="Ottawa")
         self.assertEqual(city.country, CountryChoices.UNITED_STATES)
         self.assertEqual(city._meta.get_field("country").default, "united_states")
+
+    def test_set_wrong_default_value(self):
+        City._meta.get_field("country").default = CountryInfo(12, capital="Max Capital")
+
+        with self.assertRaises(ValidationError):
+            City.objects.create(label="Ottawa")
+
+    def test_fails_if_fetching_before_registering(self):
+        with self.assertRaises(ValueError):
+            cars_register.register(CarCompanies("Toyota"), db_key="toyota")
+
+        hyundai_car = CarCompanies("Hyundai")
+
+        with self.assertRaises(ValidationError):
+            self.paris.car_companies = hyundai_car
+            self.paris.save()
+
+        cars_register.register(hyundai_car, db_key="hyundai")
+
+        cars_register._class_to_key.pop(hyundai_car)
+        cars_register._key_to_class.pop("hyundai")
+
+    def test_changing_register_dynamically(self):
+        with self.assertRaises(ValueError):
+            cars_register.register(CarCompanies("Toyota"), db_key="toyota")
+
+        hyundai_car = CarCompanies("Hyundai")
+        cars_register.register(hyundai_car, db_key="hyundai")
+
+        self.paris.car_companies = hyundai_car
+        self.paris.save()
+        self.assertEqual(self.paris.car_companies, hyundai_car)
+
+        cars_register._class_to_key.pop(hyundai_car)
+        cars_register._key_to_class.pop("hyundai")
