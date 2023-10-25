@@ -5,7 +5,7 @@ from pathlib import Path
 # drf-serializer-prefetch
 from setuptools import find_packages, setup
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 DESCRIPTION = "A field that returns a python object."
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
