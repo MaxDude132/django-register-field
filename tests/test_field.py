@@ -42,3 +42,8 @@ class RegisterFieldTestCase(TestCase):
             City.objects.filter(country=CountryChoices.FRANCE).first().country,
             self.paris.country,
         )
+
+    def test_default_value(self):
+        city = City.objects.create(label="Ottawa")
+        self.assertEqual(city.country, CountryChoices.UNITED_STATES)
+        self.assertEqual(city._meta.get_field("country").default, "united_states")

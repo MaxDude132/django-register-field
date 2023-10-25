@@ -33,5 +33,7 @@ class ContinentChoices(RegisterChoices):
 
 class City(models.Model):
     label = models.CharField(max_length=50)
-    country = RegisterField(choices=CountryChoices.choices)
+    country = RegisterField(
+        choices=CountryChoices.choices, default=CountryChoices.UNITED_STATES
+    )
     continent = RegisterField(choices=ContinentChoices.choices, null=True, blank=True)
