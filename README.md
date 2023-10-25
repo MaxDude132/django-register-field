@@ -64,12 +64,10 @@ register = Register()
 
 ```
 
-With that done, you can register objects with it in your app config's `ready` method (found in `apps.py`).:
+With that done, you can register objects within your `models.py` file directly.:
 
 ``` python
-class SomeApp(AppConfig):
-    def ready(self):
-        register.register(some_object, db_key='some_label')
+register.register(some_object, db_key='some_label')
 ```
 
 `db_key` is not required. If not set, the `label` must be set on the object, otherwise a `ValueError` is raised. You can then pass the register to the `RegisterField` directly:
@@ -82,4 +80,29 @@ class SomeModel(models.Model):
     my_field = RegisterField(register=register)
 ```
 
+You can also have it be part of the Model class:
+
+``` python
+from django_register import RegisterField
+
+
+class SomeModel(models.Model):
+    register = Register()
+    register.register(some_object, db_key='some_label')
+
+    my_field = RegisterField(register=register)
+```
+
 Note that if using that technique, you are responsible for keeping track of your object. The `RegisterChoices` make it easier to keep your objects for comparison and use them outside of the model, but both methods will give the same results database side.
+
+If you need to set the register values dynamically, you can do so after the fact by using the register directly. However in that case, you need to provide a `max_length` if your database does not support having a `CharField` without a `max_length`. That is because in the background, a `CharField` is used to store the key in the database.
+
+You can set the values dynamically like this:
+
+``` python
+class SomeApp(AppConfig):
+    def ready(self):
+        register.register(some_object, db_key='some_label')
+```
+
+It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will throw a `ValidationError` saying that the value cannot be found in the register.

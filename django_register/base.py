@@ -68,7 +68,8 @@ class Register:
 
     @property
     def max_length(self):
-        return max(len(key) for key in self._key_to_class)
+        if self._key_to_class:
+            return max(len(key) for key in self._key_to_class)
 
     def __iter__(self):
         return iter(self._key_to_class.values())
@@ -140,11 +141,14 @@ class RegisterField(models.CharField):
             else kwargs["choices"].register
         )
 
-        if "max_length" not in kwargs:
-            kwargs["max_length"] = self.register.max_length
+        if "max_length" not in kwargs and (max_length := self.register.max_length):
+            kwargs["max_length"] = max_length
 
         if "default" in kwargs:
-            kwargs["default"] = self.register.get_key(kwargs["default"])
+            try:
+                kwargs["default"] = self.register.get_key(kwargs["default"])
+            except ValidationError:
+                pass
 
         super().__init__(*args, **kwargs)
 
