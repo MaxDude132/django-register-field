@@ -143,13 +143,24 @@ class RegisterField(models.CharField):
         if "max_length" not in kwargs:
             kwargs["max_length"] = self.register.max_length
 
+        if "default" in kwargs:
+            kwargs["default"] = self.register.get_key(kwargs["default"])
+
         super().__init__(*args, **kwargs)
 
     def from_db_value(self, value, expression, connection):
         if not value:
-            return self.get_default()
+            return value
 
         return self.register.get_class(value)
+
+    def get_default(self):
+        default = super().get_default()
+
+        if default is not None:
+            return self.register.get_class(default)
+
+        return default
 
     def to_python(self, value):
         if not value:
