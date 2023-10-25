@@ -161,7 +161,7 @@ class RegisterField(models.CharField):
     def get_default(self):
         default = super().get_default()
 
-        if default is not None:
+        if default:
             return self.register.get_class(default)
 
         return default
