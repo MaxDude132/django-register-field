@@ -16,15 +16,16 @@ class AdminTestCase(TestCase):
     def setUpTestData(cls) -> None:
         cls.city = City.objects.create(label="Ottawa")
 
-    def test_admin_choices(self):
-        built_admin = CityAdmin(City, admin.site)
+    def setUp(self):
+        self.admin = CityAdmin(City, admin.site)
 
+    def test_admin_choices(self):
         # choices was renamed to _choices in Django 5.0
         choices = getattr(
-            built_admin.opts._forward_fields_map["available_food"],
+            self.admin.opts._forward_fields_map["available_food"],
             "choices",
         ) or getattr(
-            built_admin.opts._forward_fields_map["available_food"], "_choices", None
+            self.admin.opts._forward_fields_map["available_food"], "_choices", None
         )
         self.assertEqual(
             choices,
@@ -32,8 +33,16 @@ class AdminTestCase(TestCase):
         )
 
     def test_admin_select(self):
-        built_admin = CityAdmin(City, admin.site)
-
-        field = built_admin.opts._forward_fields_map["continent"]
+        field = self.admin.opts._forward_fields_map["continent"]
         cleaned_value = field.clean("America", self.city)
         self.assertEqual(cleaned_value, ContinentChoices.AMERICA)
+
+    def test_admin_flatchoices(self):
+        field = self.admin.opts._forward_fields_map["continent"]
+        self.assertEqual(
+            field.flatchoices,
+            [
+                (ContinentChoices.AMERICA, "America"),
+                (ContinentChoices.EUROPE, "Europe"),
+            ],
+        )
