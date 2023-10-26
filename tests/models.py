@@ -26,7 +26,7 @@ class ContinentInfo:
     label: str
 
 
-@dataclass(unsafe_hash=True)
+@dataclass
 class FoodInfo:
     verbose_name: str
 
@@ -35,7 +35,7 @@ food_register = Register()
 food_register.register(FoodInfo("Pizza"), db_key="pizza")
 
 
-@dataclass(unsafe_hash=True)
+@dataclass
 class CarCompanies:
     verbose_name: str
 

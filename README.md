@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from django_register import RegisterChoices
 
 
-@dataclass(unsafe_hash=True)
+@dataclass
 class MyOptions:
     some_field: str
     some_description: str
@@ -46,7 +46,7 @@ class SomeModel(models.Model):
 
 ```
 
-Note that the objects passed to RegisterChoices must be hashable. This is because the register keeps track of the relationship between the label and the object in both directions, so the object needs to be usable as a key in a dictionary.
+Note that if the object passed to the Register is not hashable, it will be stored for reverse lookup using the ID. This means that if you want to be able to consider 2 identical objects as the same object, you need to define a `__hash__` function on the class. This is because the register keeps track of the relationship between the label and the object in both directions, so the object needs to be usable as a key in a dictionary.
 
 By default, the label used in the database will be the same as the variable name on the choices, in lower case. This can be changed by having a `label` attribute on the object. If one is set, that is what will be used database side. Similarly, the verbose field used in the `.choices` to be displayed in django admin will be the variable name with all underscores replaced by a space, and `.title` applied to it. This can be changed by setting the `verbose_name` attribute on the object.
 
