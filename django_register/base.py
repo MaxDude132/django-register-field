@@ -12,6 +12,11 @@ class Register:
         self._key_to_class = {}
         self._class_to_key = {}
 
+        self._choices = []
+        self._flatchoices = []
+
+        self._fields = []
+
     def _get_class_lookup(self, klass):
         return klass if isinstance(klass, Hashable) else id(klass)
 
@@ -36,7 +41,19 @@ class Register:
         self._key_to_class[db_key] = klass
         self._class_to_key[klass] = db_key
 
+        self._choices.append((db_key, self._get_verbose_name(klass, db_key)))
+        self._flatchoices.append((klass, self._get_verbose_name(klass, db_key)))
+
+        for field in self._fields:
+            if hasattr(field, "_choices"):
+                field._choices = self._choices
+            else:
+                field.choices = self._choices
+
         return klass
+
+    def add_field(self, field: models.Field):
+        self._fields.append(field)
 
     def from_key(self, value):
         try:
@@ -78,15 +95,11 @@ class Register:
 
     @property
     def choices(self):
-        return [
-            (k, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
-        ]
+        return self._choices
 
     @property
     def flatchoices(self):
-        return [
-            (v, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
-        ]
+        return self._flatchoices
 
     def _get_verbose_name(self, klass, key):
         return getattr(klass, "verbose_name", key.replace("_", " ").title())
@@ -160,6 +173,7 @@ class RegisterField(models.CharField):
             if "register" in kwargs
             else kwargs["choices"].register
         )
+        self.register.add_field(self)
 
         if "choices" not in kwargs:
             kwargs["choices"] = self.register.choices
