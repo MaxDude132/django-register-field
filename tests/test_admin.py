@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.test import TestCase
 
 # django_register
-from tests.models import City
+from tests.models import City, ContinentChoices
 
 
 @admin.register(City)
@@ -30,3 +30,10 @@ class AdminTestCase(TestCase):
             choices,
             [("pizza", "Pizza")],
         )
+
+    def test_admin_select(self):
+        built_admin = CityAdmin(City, admin.site)
+
+        field = built_admin.opts._forward_fields_map["continent"]
+        cleaned_value = field.clean("America", self.city)
+        self.assertEqual(cleaned_value, ContinentChoices.AMERICA)
