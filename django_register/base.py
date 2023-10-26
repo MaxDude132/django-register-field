@@ -1,4 +1,5 @@
 # Django
+from typing import Hashable
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.deconstruct import deconstructible
@@ -11,6 +12,9 @@ class Register:
         self._key_to_class = {}
         self._class_to_key = {}
 
+    def _get_class_lookup(self, klass):
+        return klass if isinstance(klass, Hashable) else id(klass)
+
     def register(self, klass, db_key=None):
         if db_key is None:
             try:
@@ -19,32 +23,34 @@ class Register:
                 raise ValueError(
                     _(
                         "The class {klass} does not have a label. Define "
-                        "one to be used as database value."
+                        "one or pass a db_key to be used as database value."
                     ).format(klass=klass)
                 )
 
         if db_key in self._key_to_class:
             raise ValueError(_("Key {key} already registered.").format(key=db_key))
 
-        if klass in self._class_to_key:
+        class_lookup = self._get_class_lookup(klass)
+        if class_lookup in self._class_to_key:
             raise ValueError(_("Class {klass} already registered.").format(klass=klass))
 
         self._key_to_class[db_key] = klass
-        self._class_to_key[klass] = db_key
+        self._class_to_key[class_lookup] = db_key
 
         return klass
 
     def from_key(self, value):
         try:
             return self._key_to_class[value]
-        except KeyError:
+        except (KeyError, TypeError):
             raise ValidationError(
                 _("Value {value} not a registered key.").format(value=value)
             )
 
     def from_class(self, value):
         try:
-            return self._class_to_key[value]
+            class_lookup = self._get_class_lookup(value)
+            return self._class_to_key[class_lookup]
         except KeyError:
             raise ValidationError(
                 _("Value {value} not a registered class.").format(value=value)
