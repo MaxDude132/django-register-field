@@ -80,9 +80,17 @@ class Register:
     @property
     def choices(self):
         return [
-            (k, getattr(k, "verbose_name", k.replace("_", " ").title()))
-            for k in self._key_to_class
+            (k, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
         ]
+
+    @property
+    def flatchoices(self):
+        return [
+            (v, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
+        ]
+
+    def _get_verbose_name(self, klass, key):
+        return getattr(klass, "verbose_name", key.replace("_", " ").title())
 
     def __iter__(self):
         return iter(self._key_to_class.values())
@@ -213,3 +221,8 @@ class RegisterField(models.CharField):
         self.validate(value, model_instance)
         self.run_validators(value)
         return self.to_python(value)
+
+    def _get_flatchoices(self):
+        return self.register.flatchoices
+
+    flatchoices = property(_get_flatchoices)
