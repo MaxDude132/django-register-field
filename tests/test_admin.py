@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.test import TestCase
 
 # django_register
-from tests.models import City, ContinentChoices
+from tests.models import City, ContinentChoices, ContinentInfo
 
 
 @admin.register(City)
@@ -44,5 +44,40 @@ class AdminTestCase(TestCase):
             [
                 (ContinentChoices.AMERICA, "America"),
                 (ContinentChoices.EUROPE, "Europe"),
+            ],
+        )
+
+    def test_choices_gets_updated(self):
+        field = self.admin.opts._forward_fields_map["continent"]
+        attr = "choices" if hasattr(field, "choices") else "_choices"
+
+        self.assertEqual(
+            getattr(field, attr),
+            [
+                ("America", "America"),
+                ("Europe", "Europe"),
+            ],
+        )
+
+        register = ContinentChoices.register
+
+        self.assertEqual(
+            register.choices, [("America", "America"), ("Europe", "Europe")]
+        )
+
+        register.register(ContinentInfo(label="Asia"))
+
+        field = self.admin.opts._forward_fields_map["continent"]
+
+        self.assertEqual(
+            register.choices,
+            [("America", "America"), ("Europe", "Europe"), ("Asia", "Asia")],
+        )
+        self.assertEqual(
+            getattr(field, attr),
+            [
+                ("America", "America"),
+                ("Europe", "Europe"),
+                ("Asia", "Asia"),
             ],
         )
