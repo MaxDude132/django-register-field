@@ -194,7 +194,7 @@ class RegisterField(models.CharField):
 
         return self.register.get_key(value)
 
-    def value_to_string(self, obj):
+    def value_from_object(self, obj):
         value = super().value_from_object(obj)
         return self.get_prep_value(value)
 
@@ -203,3 +203,13 @@ class RegisterField(models.CharField):
         kwargs.pop("choices", None)
         kwargs["register"] = self.register
         return name, path, args, kwargs
+
+    def clean(self, value, model_instance):
+        """
+        We need to override clean because it runs the validations on the
+        Python object instead of on the database string.
+        """
+        value = self.get_prep_value(value)
+        self.validate(value, model_instance)
+        self.run_validators(value)
+        return self.to_python(value)
