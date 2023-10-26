@@ -30,12 +30,11 @@ class Register:
         if db_key in self._key_to_class:
             raise ValueError(_("Key {key} already registered.").format(key=db_key))
 
-        class_lookup = self._get_class_lookup(klass)
-        if class_lookup in self._class_to_key:
+        if klass in self._class_to_key:
             raise ValueError(_("Class {klass} already registered.").format(klass=klass))
 
         self._key_to_class[db_key] = klass
-        self._class_to_key[class_lookup] = db_key
+        self._class_to_key[klass] = db_key
 
         return klass
 

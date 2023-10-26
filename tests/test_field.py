@@ -75,7 +75,7 @@ class RegisterFieldTestCase(TestCase):
 
         cars_register.register(hyundai_car, db_key="hyundai")
 
-        cars_register._class_to_key.pop(id(hyundai_car))
+        cars_register._class_to_key.pop(hyundai_car)
         cars_register._key_to_class.pop("hyundai")
 
     def test_changing_register_dynamically(self):
@@ -89,7 +89,7 @@ class RegisterFieldTestCase(TestCase):
         self.paris.save()
         self.assertEqual(self.paris.car_companies, hyundai_car)
 
-        cars_register._class_to_key.pop(id(hyundai_car))
+        cars_register._class_to_key.pop(hyundai_car)
         cars_register._key_to_class.pop("hyundai")
 
     def test_annotations(self):
