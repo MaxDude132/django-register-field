@@ -34,9 +34,6 @@ class Register:
 
         return klass
 
-    def add_field(self, field: models.Field):
-        self._fields.append(field)
-
     def from_key(self, value):
         try:
             return self._key_to_class[value]
