@@ -173,7 +173,8 @@ class RegisterField(models.CharField):
             if "register" in kwargs
             else kwargs["choices"].register
         )
-        self.register.add_field(self)
+        if not kwargs.pop("no_register_field", None):
+            self.register.add_field(self)
 
         if "choices" not in kwargs:
             kwargs["choices"] = self.register.choices
@@ -223,6 +224,7 @@ class RegisterField(models.CharField):
         name, path, args, kwargs = super().deconstruct()
         kwargs.pop("choices", None)
         kwargs["register"] = self.register
+        kwargs["no_register_field"] = True
         return name, path, args, kwargs
 
     def clean(self, value, model_instance):
