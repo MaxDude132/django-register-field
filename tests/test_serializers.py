@@ -26,6 +26,11 @@ class RegisterSerializerTestCase(TestCase):
         serializer = CitySerialier(self.paris)
         self.assertEqual(serializer.data, {"label": "Paris", "country": "france"})
 
+    def test_serializer_wrong_value(self):
+        serializer = CitySerialier(data={"label": "Paris", "country": "francis"})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("country", serializer.errors)
+
     def test_save(self):
         serializer = CitySerialier(
             data={"label": "Paris", "country": CountryChoices.FRANCE}
