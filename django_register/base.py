@@ -11,11 +11,6 @@ class Register:
         self._key_to_class = {}
         self._class_to_key = {}
 
-        self._choices = []
-        self._flatchoices = []
-
-        self._fields = []
-
     def register(self, klass, db_key=None):
         if db_key is None:
             try:
@@ -36,15 +31,6 @@ class Register:
 
         self._key_to_class[db_key] = klass
         self._class_to_key[klass] = db_key
-
-        self._choices.append((db_key, self._get_verbose_name(klass, db_key)))
-        self._flatchoices.append((klass, self._get_verbose_name(klass, db_key)))
-
-        for field in self._fields:
-            if hasattr(field, "_choices"):
-                field._choices = self._choices
-            else:
-                field.choices = self._choices
 
         return klass
 
@@ -90,11 +76,15 @@ class Register:
 
     @property
     def choices(self):
-        return self._choices
+        return [
+            (k, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
+        ]
 
     @property
     def flatchoices(self):
-        return self._flatchoices
+        return [
+            (v, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
+        ]
 
     def _get_verbose_name(self, klass, key):
         return getattr(klass, "verbose_name", key.replace("_", " ").title())
@@ -168,8 +158,6 @@ class RegisterField(models.CharField):
             if "register" in kwargs
             else kwargs["choices"].register
         )
-        if not kwargs.pop("no_register_field", None):
-            self.register.add_field(self)
 
         if "choices" not in kwargs:
             kwargs["choices"] = self.register.choices
@@ -219,7 +207,6 @@ class RegisterField(models.CharField):
         name, path, args, kwargs = super().deconstruct()
         kwargs.pop("choices", None)
         kwargs["register"] = self.register
-        kwargs["no_register_field"] = True
         return name, path, args, kwargs
 
     def clean(self, value, model_instance):
@@ -236,3 +223,12 @@ class RegisterField(models.CharField):
         return self.register.flatchoices
 
     flatchoices = property(_get_flatchoices)
+
+    def _register_choices(self):
+        return self.register.choices
+
+    def _register_choices_set(self, value):
+        return
+
+    choices = property(_register_choices, _register_choices_set)
+    _choices = property(_register_choices, _register_choices_set)
