@@ -1,5 +1,4 @@
 # Django
-from typing import Hashable
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.deconstruct import deconstructible
@@ -16,9 +15,6 @@ class Register:
         self._flatchoices = []
 
         self._fields = []
-
-    def _get_class_lookup(self, klass):
-        return klass if isinstance(klass, Hashable) else id(klass)
 
     def register(self, klass, db_key=None):
         if db_key is None:
@@ -65,8 +61,7 @@ class Register:
 
     def from_class(self, value):
         try:
-            class_lookup = self._get_class_lookup(value)
-            return self._class_to_key[class_lookup]
+            return self._class_to_key[value]
         except KeyError:
             raise ValidationError(
                 _("Value {value} not a registered class.").format(value=value)
