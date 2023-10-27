@@ -107,24 +107,6 @@ class SomeApp(AppConfig):
 
 It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will throw a `ValidationError` saying that the value cannot be found in the register.
 
-## Using with django-rest-framework
-
-If using with rest_framework, there is a Serializer Field already built in to be used by the Serializer. You simply need to set the field as such:
-
-``` python
-from django_register.rest_framework import RegisterField
-
-
-class SomeModelSerializer(serializers.ModelSerializer):
-    some_register_field = RegisterField()
-
-    class Meta:
-        model = SomeModel
-        fields = ('some_register_field',)
-```
-
-Behind the scenes, the serializer field goes and gets the register from the model field to get the work done.
-
 ## Thanks
 
 Huge thanks to Tim Schilling from Better Simple for his [article](https://www.better-simple.com/django/2023/10/03/registerfields-in-django/) that was the catalyst behind the idea for this library.
