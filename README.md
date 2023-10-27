@@ -106,3 +106,7 @@ class SomeApp(AppConfig):
 ```
 
 It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will throw a `ValidationError` saying that the value cannot be found in the register.
+
+## Thanks
+
+Huge thanks to Tim Schilling from Better Simple for his [article](https://www.better-simple.com/django/2023/10/03/registerfields-in-django/) that was the catalyst behind the idea for this library.
