@@ -42,7 +42,7 @@ from django_register import RegisterField
 
 
 class SomeModel(models.Model):
-    my_field = RegisterField(choices=SomeRegisterChoices.choices)
+    my_field = RegisterField(choices=SomeRegisterChoices)
 
 ```
 
