@@ -51,9 +51,9 @@ class ContinentChoices(RegisterChoices):
 class City(models.Model):
     label = models.CharField(max_length=50)
     country = RegisterField(
-        choices=CountryChoices.choices, default=CountryChoices.UNITED_STATES
+        choices=CountryChoices, default=CountryChoices.UNITED_STATES
     )
-    continent = RegisterField(choices=ContinentChoices.choices, null=True, blank=True)
+    continent = RegisterField(choices=ContinentChoices, null=True, blank=True)
     available_food = RegisterField(register=food_register, null=True, blank=True)
     car_companies = RegisterField(
         register=cars_register, null=True, blank=True, max_length=50
