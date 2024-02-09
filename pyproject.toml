@@ -22,3 +22,6 @@ sections = [
   "FIRSTPARTY",
   "LOCALFOLDER",
 ]
+
+[tool.ruff]
+ignore = ["E501"]
