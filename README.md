@@ -125,6 +125,38 @@ class SomeModelSerializer(serializers.ModelSerializer):
 
 Behind the scenes, the serializer field goes and gets the register from the model field to get the work done.
 
+---
+
+Since v1.0.7, it is now possible to pass `keys` to the serializer RegisterField to tell it to return an object with those keys. This is useful if you want to expose certain values on the object to the API.
+
+It would look something like this:
+
+``` python
+from django_register.rest_framework import RegisterField
+
+
+class SomeModelSerializer(serializers.ModelSerializer):
+    some_register_field = RegisterField(key=['label', 'some_value', 'some_other_value'])
+
+    class Meta:
+        model = SomeModel
+        fields = ('some_register_field',)
+```
+
+The example above would return the following JSON:
+
+``` JSON
+{
+    "some_register_field": {
+        "label": "obj_label",
+        "some_value": "value",
+        "some_other_value": "other_value"
+    }
+}
+```
+
+Note that if the `label` or `verbose_name` is not set on the object directly, the default value that is set automatically will be returned, so they can always be used this way.
+
 ## Thanks
 
 Huge thanks to Tim Schilling from Better Simple for his [article](https://www.better-simple.com/django/2023/10/03/registerfields-in-django/) that was the catalyst behind the idea for this library.
