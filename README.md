@@ -136,7 +136,7 @@ from django_register.rest_framework import RegisterField
 
 
 class SomeModelSerializer(serializers.ModelSerializer):
-    some_register_field = RegisterField(key=['label', 'some_value', 'some_other_value'])
+    some_register_field = RegisterField(keys=['label', 'some_value', 'some_other_value'])
 
     class Meta:
         model = SomeModel
