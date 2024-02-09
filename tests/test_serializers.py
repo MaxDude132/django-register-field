@@ -54,3 +54,24 @@ class RegisterSerializerTestCase(TestCase):
 
         with self.assertRaises(ValueError):
             serializer.data
+
+    def test_keys(self):
+        class CitySerialier(serializers.ModelSerializer):
+            country = RegisterField(keys=["label", "verbose_name", "capital"])
+
+            class Meta:
+                model = City
+                fields = ("label", "country")
+
+        serializer = CitySerialier(self.paris)
+        self.assertEqual(
+            serializer.data,
+            {
+                "label": "Paris",
+                "country": {
+                    "label": "france",
+                    "verbose_name": "France",
+                    "capital": "Paris",
+                },
+            },
+        )
