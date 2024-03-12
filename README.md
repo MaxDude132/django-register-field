@@ -107,6 +107,36 @@ class SomeApp(AppConfig):
 
 It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will throw a `ValidationError` saying that the value cannot be found in the register.
 
+## Considerations when removing objects
+
+Removing items from the register requires some consideration. The string in the database is still there unless you create a migration, and it is possible it will cause issues due to the class linked to it not existing anymore. Before version 1.0.8, this would fail dramatically, giving a ValidationError and stopping anyone from interacting with the database items it was linked to, not event to delete (in most cases). In that case, the onl solution would be to add the item back, delete or edit the affected database rows, then remove the item again.
+
+From v1.0.8 onward, it will no longer fail dramatically, but rather return a default object. This default object will only contain the label. If you want to define other defaults for fields that are accessed, you can pass an `unknown_item_class` parameter to the `RegisterField`, to the register itself, or set an `_UNKNOWN_` attribute in the `RegisterChoices`. All these methods will give the same result: defining the default object to be used when the item can no longer be found. Note that the label will not be passed, but rather set after the creation of the object, so make sure that the `__init__` takes no argument. It is also recommended to use a different class from the one used to set the options, if only to allow checking if the object is an instance of said class later.
+
+### Examples
+
+#### `RegisterChoices`
+
+``` python
+class SomeRegisterChoices(RegisterChoices):
+    OPTION_1 = MyOptions(some_field='field_name', some_description='field_description')
+    OPTION_2 = MyOptions(some_field='field_name_2', some_description='field_description_2')
+    _UNKNOWN_ = UnknownOption
+```
+
+#### `RegisterField`
+
+``` python
+class SomeModel(models.Model):
+    my_field = RegisterField(register=register, unknown_item_class=UnknownOption)
+```
+
+#### To the register itself
+
+``` python
+register = Register(unknown_item_class=UnknownOption)
+```
+
 ## Using with django-rest-framework
 
 If using with rest_framework, there is a Serializer Field already built in to be used by the Serializer. You simply need to set the field as such:

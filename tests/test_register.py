@@ -1,8 +1,9 @@
 # Django
+from django.forms import ValidationError
 from django.test import TestCase
 
 # django_register
-from django_register.base import Register
+from django_register.base import Register, UnknownRegisterItem
 from tests.models import CountryChoices, CountryInfo
 
 
@@ -43,3 +44,20 @@ class RegisterTestCase(TestCase):
                 CountryInfo(population=2, capital="Some capital"),
                 db_key="canada",
             )
+
+    def test_unknown_key(self):
+        with self.assertWarns(UserWarning):
+            obj = self.register.get_class("unknown")
+        self.assertIsInstance(obj, UnknownRegisterItem)
+
+        with self.assertRaises(ValidationError):
+            self.register.get_key(CountryInfo(12, capital="Max Capital"))
+
+        class OtherUnknownItem:
+            label: str
+            description: str = ""
+
+        self.register.unknown_item_class = OtherUnknownItem
+        with self.assertWarns(UserWarning):
+            obj = self.register.get_class("unknown")
+        self.assertIsInstance(obj, OtherUnknownItem)
