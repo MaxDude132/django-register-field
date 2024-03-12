@@ -1,8 +1,9 @@
 # Django
 from django.test import TestCase
+from django_register import RegisterChoices
 
 # django_register
-from tests.models import CountryChoices
+from tests.models import CountryChoices, CountryInfo
 
 
 class ChoicesTestCase(TestCase):
@@ -34,4 +35,18 @@ class ChoicesTestCase(TestCase):
                 ("germany", "Germany"),
                 ("united_states", "United States"),
             ],
+        )
+
+    def test_register_unknown_option(self):
+        class UnknownOption:
+            label: str
+            description: str = ""
+
+        class CountryChoices(RegisterChoices):
+            _UNKNOWN_ = UnknownOption
+            CANADA = CountryInfo("canada", "Canada")
+
+        self.assertEqual(
+            CountryChoices.register.unknown_item_class,
+            UnknownOption,
         )

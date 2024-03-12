@@ -4,7 +4,7 @@ from django.db import models
 from django.test import TestCase
 
 # django_register
-from django_register.base import RegisterField
+from django_register.base import RegisterField, UnknownRegisterItem
 from tests.models import (
     CountryInfo,
     Neighborhood,
@@ -107,3 +107,23 @@ class RegisterFieldTestCase(TestCase):
             neighborhood.country,
             CountryChoices.FRANCE,
         )
+
+    def test_unknown_key(self):
+        france = CountryChoices.FRANCE
+        CountryChoices.register._key_to_class.pop("france")
+        CountryChoices.register._class_to_key.pop(france)
+
+        self.paris.refresh_from_db()
+        self.assertIsInstance(self.paris.country, UnknownRegisterItem)
+
+        class UnknownItem:
+            label: str
+            description: str = ""
+
+        CountryChoices.register.unknown_item_class = UnknownItem
+        self.paris.refresh_from_db()
+        self.assertIsInstance(self.paris.country, UnknownItem)
+
+        # Clean up
+        CountryChoices.register.unknown_item_class = UnknownRegisterItem
+        CountryChoices.register.register(france, db_key="france")
