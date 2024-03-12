@@ -112,11 +112,9 @@ class RegisterChoicesMeta(type):
         cls = super().__new__(mcs, name, bases, attrs)
 
         unknown_key = "_UNKNOWN_"
-        cls.register = Register(unknown_item_class=cls._all_mapping.get(unknown_key))
+        cls.register = Register(unknown_item_class=attrs.get(unknown_key))
 
         for label, member in cls._all_mapping.items():
-            if label == unknown_key:
-                continue
             cls.register.register(member, db_key=label)
 
         return cls
