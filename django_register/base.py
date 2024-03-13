@@ -45,10 +45,10 @@ class Register:
         try:
             return self._key_to_class[value]
         except (KeyError, TypeError):
-            if not ignore_warning:
+            if not ignore_warning and not isinstance(value, self.unknown_item_class):
                 warnings.warn(
                     _(
-                        "Value {value} not a registered key. The unknown_item_class will be used to return the value"
+                        "Value {value} is not registered. The unknown_item_class will be used to return the value"
                     ).format(value=value)
                 )
             obj = self.unknown_item_class()

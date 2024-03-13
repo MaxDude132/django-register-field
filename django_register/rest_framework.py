@@ -53,12 +53,13 @@ class RegisterField(serializers.CharField):
         return self.register.get_class(data)
 
     def run_validation(self, data: Any = ...) -> Any:
+        data = super().run_validation(data)
         obj = self.register.get_class(data)
         if isinstance(obj, self.register.unknown_item_class):
             raise serializers.ValidationError(
                 _("Value {value} not a registered key.").format(value=data)
             )
-        return super().run_validation(data)
+        return data
 
     def to_representation(self, value: str) -> str | dict[str, Any]:  # type: ignore[override]
         if self.keys is None:

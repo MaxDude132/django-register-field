@@ -60,7 +60,7 @@ class RegisterFieldTestCase(TestCase):
     def test_set_wrong_default_value(self):
         City._meta.get_field("country").default = CountryInfo(12, capital="Max Capital")
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError), self.assertWarns(UserWarning):
             City.objects.create(label="Ottawa")
 
     def test_fails_if_fetching_before_registering(self):
@@ -113,7 +113,8 @@ class RegisterFieldTestCase(TestCase):
         CountryChoices.register._key_to_class.pop("france")
         CountryChoices.register._class_to_key.pop(france)
 
-        self.paris.refresh_from_db()
+        with self.assertWarns(UserWarning):
+            self.paris.refresh_from_db()
         self.assertIsInstance(self.paris.country, UnknownRegisterItem)
 
         class UnknownItem:
@@ -121,7 +122,8 @@ class RegisterFieldTestCase(TestCase):
             description: str = ""
 
         CountryChoices.register.unknown_item_class = UnknownItem
-        self.paris.refresh_from_db()
+        with self.assertWarns(UserWarning):
+            self.paris.refresh_from_db()
         self.assertIsInstance(self.paris.country, UnknownItem)
 
         # Clean up
