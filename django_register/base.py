@@ -1,3 +1,5 @@
+import warnings
+
 # Django
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -5,11 +7,16 @@ from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
 
+class UnknownRegisterItem:
+    label: str
+
+
 @deconstructible
 class Register:
-    def __init__(self):
+    def __init__(self, unknown_item_class=None):
         self._key_to_class = {}
         self._class_to_key = {}
+        self.unknown_item_class = unknown_item_class or UnknownRegisterItem
 
     def register(self, klass, db_key=None):
         if db_key is None:
@@ -34,13 +41,19 @@ class Register:
 
         return klass
 
-    def from_key(self, value):
+    def from_key(self, value, ignore_warning=False):
         try:
             return self._key_to_class[value]
         except (KeyError, TypeError):
-            raise ValidationError(
-                _("Value {value} not a registered key.").format(value=value)
-            )
+            if not ignore_warning:
+                warnings.warn(
+                    _(
+                        "Value {value} not a registered key. The unknown_item_class will be used to return the value"
+                    ).format(value=value)
+                )
+            obj = self.unknown_item_class()
+            obj.label = value
+            return obj
 
     def from_class(self, value):
         try:
@@ -51,9 +64,9 @@ class Register:
             )
 
     def get_key(self, value):
-        try:
-            self.from_key(value)
-        except ValidationError:
+        obj = self.from_key(value, ignore_warning=True)
+
+        if value is not None and isinstance(obj, self.unknown_item_class):
             return self.from_class(value)
 
         return value
@@ -98,7 +111,9 @@ class RegisterChoicesMeta(type):
     def __new__(mcs, name, bases, attrs):  # noqa: N804
         cls = super().__new__(mcs, name, bases, attrs)
 
-        cls.register = Register()
+        unknown_key = "_UNKNOWN_"
+        cls.register = Register(unknown_item_class=attrs.get(unknown_key))
+
         for label, member in cls._all_mapping.items():
             cls.register.register(member, db_key=label)
 
