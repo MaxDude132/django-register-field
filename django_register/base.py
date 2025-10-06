@@ -6,12 +6,18 @@ from django.db import models
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
+from .settings import settings
+
 
 class UnknownRegisterItem:
-    label: str
+    def __new__(cls, *args, **kwargs):
+        instance = super().__new__(cls, *args, **kwargs)
+        # Dynamically set the key attribute based on current settings
+        setattr(instance, settings.KEY_NAME, None)
+        return instance
 
     def __str__(self):
-        return f"<Unknown register key: {self.label}>"
+        return f"<Unknown register key: {getattr(self, settings.KEY_NAME)}>"
 
 
 @deconstructible
@@ -24,13 +30,13 @@ class Register:
     def register(self, klass, db_key=None):
         if db_key is None:
             try:
-                db_key = klass.label
+                db_key = getattr(klass, settings.KEY_NAME)
             except AttributeError:
                 raise ValueError(
                     _(
-                        "The class {klass} does not have a label. Define "
+                        "The class {klass} does not have attribute {key}. Define "
                         "one or pass a db_key to be used as database value."
-                    ).format(klass=klass)
+                    ).format(klass=klass, key=settings.KEY_NAME)
                 )
 
         if db_key in self._key_to_class:
@@ -51,11 +57,11 @@ class Register:
             if not ignore_warning and not isinstance(value, self.unknown_item_class):
                 warnings.warn(
                     _(
-                        "Value {value} is not registered. The unknown_item_class will be used to return the value"
+                        "Value {value} is not registered. The unknown_item_class will be used to return the value."
                     ).format(value=value)
                 )
             obj = self.unknown_item_class()
-            obj.label = value
+            setattr(obj, settings.KEY_NAME, value)
             return obj
 
     def from_class(self, value):
@@ -89,18 +95,14 @@ class Register:
 
     @property
     def choices(self):
-        return [
-            (k, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
-        ]
+        return [(k, self._get_label(v, k)) for k, v in self._key_to_class.items()]
 
     @property
     def flatchoices(self):
-        return [
-            (v, self._get_verbose_name(v, k)) for k, v in self._key_to_class.items()
-        ]
+        return [(v, self._get_label(v, k)) for k, v in self._key_to_class.items()]
 
-    def _get_verbose_name(self, klass, key):
-        return getattr(klass, "verbose_name", key.replace("_", " ").title())
+    def _get_label(self, klass, key):
+        return getattr(klass, settings.LABEL_NAME, key.replace("_", " ").title())
 
     def __iter__(self):
         return iter(self._key_to_class.values())
@@ -117,19 +119,19 @@ class RegisterChoicesMeta(type):
         unknown_key = "_UNKNOWN_"
         cls.register = Register(unknown_item_class=attrs.get(unknown_key))
 
-        for label, member in cls._all_mapping.items():
-            cls.register.register(member, db_key=label)
+        for key, member in cls._all_mapping.items():
+            cls.register.register(member, db_key=key)
 
         return cls
 
-    def _label_name(cls, name, obj):
-        default_label = name.lower()
-        return getattr(obj, "label", default_label)
+    def _key_name(cls, name, obj):
+        default_key = name.lower()
+        return getattr(obj, settings.KEY_NAME, default_key)
 
     @property
     def _all_mapping(cls):
         return {
-            cls._label_name(key, value): value
+            cls._key_name(key, value): value
             for key, value in cls.__dict__.items()
             if not key.startswith("_") and key.isupper()
         }
@@ -138,11 +140,11 @@ class RegisterChoicesMeta(type):
     def choices(cls):
         choices = RegisterList()
 
-        for label, obj in cls._all_mapping.items():
-            default_verbose_name = label.replace("_", " ").title()
-            verbose_name = getattr(obj, "verbose_name", default_verbose_name)
+        for key, obj in cls._all_mapping.items():
+            default_verbose_name = key.replace("_", " ").title()
+            label = getattr(obj, settings.LABEL_NAME, default_verbose_name)
 
-            choices.append((label, verbose_name))
+            choices.append((key, label))
 
         choices.register = cls.register
         return choices

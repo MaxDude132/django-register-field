@@ -23,12 +23,12 @@ class CountryChoices(RegisterChoices):
 
 @dataclass(unsafe_hash=True)
 class ContinentInfo:
-    label: str
+    key: str
 
 
 @dataclass(unsafe_hash=True)
 class FoodInfo:
-    verbose_name: str
+    label: str
 
 
 food_register = Register()
@@ -37,19 +37,19 @@ food_register.register(FoodInfo("Pizza"), db_key="pizza")
 
 @dataclass(unsafe_hash=True)
 class CarCompanies:
-    verbose_name: str
+    label: str
 
 
 cars_register = Register()
 
 
 class ContinentChoices(RegisterChoices):
-    AMERICA = ContinentInfo(label="America")
-    EUROPE = ContinentInfo(label="Europe")
+    AMERICA = ContinentInfo(key="America")
+    EUROPE = ContinentInfo(key="Europe")
 
 
 class City(models.Model):
-    label = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
     country = RegisterField(
         choices=CountryChoices, default=CountryChoices.UNITED_STATES
     )
@@ -61,5 +61,5 @@ class City(models.Model):
 
 
 class Neighborhood(models.Model):
-    label = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
     city = models.ForeignKey(City, on_delete=models.CASCADE)

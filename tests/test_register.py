@@ -17,7 +17,7 @@ class RegisterTestCase(TestCase):
         with self.assertRaises(ValueError):
             self.register.register(country_info)
 
-        country_info.label = "max_country"
+        country_info.key = "max_country"
         self.register.register(country_info)
 
         self.assertEqual(self.register.get_class("max_country"), country_info)

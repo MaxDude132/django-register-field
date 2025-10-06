@@ -9,6 +9,7 @@ from rest_framework import serializers
 
 # django_register
 from django_register.base import Register
+from .settings import settings
 
 if TYPE_CHECKING:
     # Rest Framework
@@ -72,11 +73,11 @@ class RegisterField(serializers.CharField):
             try:
                 out[key] = getattr(value, key)
             except AttributeError:
-                # If label or verbose_name are not on the object, the default was used.
+                # If key or label are not on the object, the default was used.
                 # We can get the default from the register.
-                if key == "label":
+                if key == settings.KEY_NAME:
                     out[key] = self.register.get_key(value)
-                elif key == "verbose_name":
+                elif key == settings.LABEL_NAME:
                     out[key] = self.register.get_key(value).replace("_", " ").title()
                 else:
                     errors.append(key)

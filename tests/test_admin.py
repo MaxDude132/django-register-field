@@ -14,7 +14,7 @@ class CityAdmin(admin.ModelAdmin):
 class AdminTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.city = City.objects.create(label="Ottawa")
+        cls.city = City.objects.create(name="Ottawa")
 
     def setUp(self):
         self.admin = CityAdmin(City, admin.site)
@@ -65,7 +65,7 @@ class AdminTestCase(TestCase):
             register.choices, [("America", "America"), ("Europe", "Europe")]
         )
 
-        register.register(ContinentInfo(label="Asia"))
+        register.register(ContinentInfo(key="Asia"))
 
         field = self.admin.opts._forward_fields_map["continent"]
 
