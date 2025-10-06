@@ -4,7 +4,7 @@ from pathlib import Path
 # django_register
 from setuptools import find_packages, setup
 
-VERSION = "1.0.9"
+VERSION = "2.0.0"
 DESCRIPTION = "A field that returns a python object."
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
