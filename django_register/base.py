@@ -10,6 +10,9 @@ from django.utils.translation import gettext_lazy as _
 class UnknownRegisterItem:
     label: str
 
+    def __str__(self):
+        return f"<Unknown register key: {self.label}>"
+
 
 @deconstructible
 class Register:
