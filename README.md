@@ -10,6 +10,10 @@ A field that returns a python object.
 pip install django-register-field
 ```
 
+## Migration from V1 to V2
+
+There have been breaking changes made between V1 and V2. Please read the [migration docs](migration_v1_to_v2.md).
+
 ## Usage
 
 The `RegisterField` allows storing specific objects in the database and retrieving them directly from the model. They will be stored as strings, with a `Register` that is used to keep track of which string maps to what object. It cannot be used to store objects dynamically, but can be very useful for separating some logic into their related classes, reducing the number of if/else required in the model methods.
@@ -50,11 +54,16 @@ class SomeModel(models.Model):
 
 Note that the objects passed to `RegisterChoices` must be hashable. This is because the register keeps track of the relationship between the label and the object in both directions, so the object needs to be usable as a key in a dictionary.
 
-By default, the label used in the database will be the same as the variable name of the choices, in lower case. This can be changed by having a `label` attribute on the object. If one is set, that is what will be used database side. Similarly, the verbose field used in the `.choices` to be displayed in Django admin will be the variable name with all underscores replaced by a space, and `.title` applied to it. This can be changed by setting the `verbose_name` attribute on the object.
+By default, the label used in the database will be the same as the variable name of the choices, in lower case. This can be changed by having a `key` attribute on the object. If one is set, that is what will be used database side. Similarly, the verbose field used in the `.choices` to be displayed in Django admin will be the variable name with all underscores replaced by a space, and `.title` applied to it. This can be changed by setting the `label` attribute on the object.
 
 In the background, `RegisterChoices` takes care of setting and handling the Register for you. You can also create it and set it manually, if using the Choices is not an option.
 
 ### Setting the Register directly
+
+The method with the Choices is very good when what you want to keep is information. However, if there is logic that changes as well, you can quickly end up with circular dependencies, 
+where the `RegisterField` needs the `RegisterChoices`, which in turn needs you objects. If your code calling the model then is in those same objects, you get the circularity. In that situation,
+it might be better to keep a structure where the `RegisterField` has no knowledge of the objects it holds. This can be done by creating the `Register` manually and then adding the objects
+to it. This register can then be passed directly to the `RegisterField`.
 
 To set the register manually, you first need to instantiate a Register:
 
@@ -66,13 +75,13 @@ register = Register()
 
 ```
 
-With that done, you can register objects within your `models.py` file directly:
+With that done, you can register objects:
 
 ```python
 register.register(some_object, db_key='some_label')
 ```
 
-`db_key` is optional. If not set, the `label` must be set on the object, otherwise a `ValueError` is raised. You can then pass the register to the `RegisterField` directly:
+`db_key` is optional. If not set, the `key` must be set on the object, otherwise a `ValueError` is raised. You can then pass the register to the `RegisterField` directly:
 
 ```python
 from django_register import RegisterField
@@ -95,6 +104,18 @@ class SomeModel(models.Model):
     my_field = RegisterField(register=register)
 ```
 
+You can even use it as a decorator:
+
+```python
+@register.register
+class SomeClass:
+    key = "some_class"
+
+@register.register(db_key="some_other_class")
+class SomeOtherClass:
+    pass
+```
+
 Note that if using that technique, you are responsible for keeping track of your object. The `RegisterChoices` make it easier to keep your objects for comparison and use them outside of the model, but both methods will give the same results database side.
 
 If you need to set the register values dynamically, you can do so after the fact by using the register directly. However in that case, you need to provide a `max_length` if your database does not support having a `CharField` without a `max_length`. That is because in the background, a `CharField` is used to store the key in the database.
@@ -107,7 +128,7 @@ class SomeApp(AppConfig):
         register.register(some_object, db_key='some_label')
 ```
 
-It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will throw a `ValidationError` saying that the value cannot be found in the register.
+It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will return the `unknow_item_class` instead of the expected object.
 
 ## Considerations when removing objects
 
@@ -168,7 +189,7 @@ from django_register.rest_framework import RegisterField
 
 
 class SomeModelSerializer(serializers.ModelSerializer):
-    some_register_field = RegisterField(keys=['label', 'some_value', 'some_other_value'])
+    some_register_field = RegisterField(keys=['key', 'some_value', 'some_other_value'])
 
     class Meta:
         model = SomeModel
@@ -180,14 +201,14 @@ The example above would return the following JSON:
 ```json
 {
     "some_register_field": {
-        "label": "obj_label",
+        "key": "obj_label",
         "some_value": "value",
         "some_other_value": "other_value"
     }
 }
 ```
 
-Note that if the `label` or `verbose_name` is not set on the object directly, the default value that is set automatically will be returned, so they can always be used this way.
+Note that if the `key` or `label` is not set on the object directly, the default value that is set automatically will be returned, so they can always be used this way.
 
 ## Supported Versions
 

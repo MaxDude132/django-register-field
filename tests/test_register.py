@@ -61,3 +61,31 @@ class RegisterTestCase(TestCase):
         with self.assertWarns(UserWarning):
             obj = self.register.get_class("unknown")
         self.assertIsInstance(obj, OtherUnknownItem)
+
+
+class RegisterWithDecoratorTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.register = Register()
+
+    def test_register_with_decorator(self):
+        @self.register.register
+        class ItemA:
+            key = "item_a"
+
+        @self.register.register(db_key="item_b")
+        class ItemB:
+            pass
+
+        @self.register.register()
+        class ItemC:
+            key = "item_c"
+
+        self.assertEqual(self.register.get_key(ItemA), "item_a")
+        self.assertEqual(self.register.get_class("item_a"), ItemA)
+
+        self.assertEqual(self.register.get_key(ItemB), "item_b")
+        self.assertEqual(self.register.get_class("item_b"), ItemB)
+
+        self.assertEqual(self.register.get_key(ItemC), "item_c")
+        self.assertEqual(self.register.get_class("item_c"), ItemC)

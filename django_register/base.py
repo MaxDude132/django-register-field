@@ -27,7 +27,10 @@ class Register:
         self._class_to_key = {}
         self.unknown_item_class = unknown_item_class or UnknownRegisterItem
 
-    def register(self, klass, db_key=None):
+    def register(self, klass=None, db_key=None):
+        if klass is None:
+            return lambda k: self.register(k, db_key=db_key)
+
         if db_key is None:
             try:
                 db_key = getattr(klass, settings.KEY_NAME)
