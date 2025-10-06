@@ -1,4 +1,4 @@
-django>=5.0a1
+django>=5
 djangorestframework>=3.12
 coverage
 tox

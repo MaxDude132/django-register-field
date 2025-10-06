@@ -189,6 +189,15 @@ The example above would return the following JSON:
 
 Note that if the `label` or `verbose_name` is not set on the object directly, the default value that is set automatically will be returned, so they can always be used this way.
 
+## Supported Versions
+
+This library is tested against the following versions:
+- Python 3.10, 3.11, 3.12 and 3.13
+- Django 4.2 and 5.2
+- Django REST Framework 3.14, 3.15 and 3.16
+
+While it probably works with some other versions, it is not garanteed.
+
 ## Thanks
 
 Huge thanks to Tim Schilling from Better Simple for his [article](https://www.better-simple.com/django/2023/10/03/registerfields-in-django/) that was the catalyst behind the idea for this library.
