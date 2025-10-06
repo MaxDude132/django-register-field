@@ -128,7 +128,7 @@ class SomeApp(AppConfig):
         register.register(some_object, db_key='some_label')
 ```
 
-It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will return the `unknow_item_class` instead of the expected object.
+It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will return the `unknown_item_class` instead of the expected object.
 
 ## Considerations when removing objects
 
