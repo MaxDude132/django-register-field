@@ -39,7 +39,7 @@ class ChoicesTestCase(TestCase):
 
     def test_register_unknown_option(self):
         class UnknownOption:
-            label: str
+            key: str
             description: str = ""
 
         class CountryChoices(RegisterChoices):

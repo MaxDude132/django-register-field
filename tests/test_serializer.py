@@ -14,27 +14,27 @@ class CitySerialier(serializers.ModelSerializer):
 
     class Meta:
         model = City
-        fields = ("label", "country")
+        fields = ("name", "country")
 
 
 class RegisterSerializerTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.paris = City.objects.create(label="Paris", country=CountryChoices.FRANCE)
+        cls.paris = City.objects.create(name="Paris", country=CountryChoices.FRANCE)
 
     def test_serialization(self):
         serializer = CitySerialier(self.paris)
-        self.assertEqual(serializer.data, {"label": "Paris", "country": "france"})
+        self.assertEqual(serializer.data, {"name": "Paris", "country": "france"})
 
     def test_serializer_wrong_value(self):
-        serializer = CitySerialier(data={"label": "Paris", "country": "francis"})
+        serializer = CitySerialier(data={"name": "Paris", "country": "francis"})
         with self.assertWarns(UserWarning):
             self.assertFalse(serializer.is_valid())
         self.assertIn("country", serializer.errors)
 
     def test_save(self):
         serializer = CitySerialier(
-            data={"label": "Paris", "country": CountryChoices.FRANCE}
+            data={"name": "Paris", "country": CountryChoices.FRANCE}
         )
 
         self.assertTrue(serializer.is_valid())
@@ -44,12 +44,12 @@ class RegisterSerializerTestCase(TestCase):
 
     def test_wrong_field_type(self):
         class CitySerialier(serializers.ModelSerializer):
-            label = RegisterField()
+            name = RegisterField()
             country = RegisterField()
 
             class Meta:
                 model = City
-                fields = ("label", "country")
+                fields = ("name", "country")
 
         serializer = CitySerialier(self.paris)
 
@@ -57,21 +57,21 @@ class RegisterSerializerTestCase(TestCase):
             serializer.data
 
     def test_keys(self):
-        class CitySerialier(serializers.ModelSerializer):
-            country = RegisterField(keys=["label", "verbose_name", "capital"])
+        class CitySerializer(serializers.ModelSerializer):
+            country = RegisterField(keys=["key", "label", "capital"])
 
             class Meta:
                 model = City
-                fields = ("label", "country")
+                fields = ("name", "country")
 
-        serializer = CitySerialier(self.paris)
+        serializer = CitySerializer(self.paris)
         self.assertEqual(
             serializer.data,
             {
-                "label": "Paris",
+                "name": "Paris",
                 "country": {
-                    "label": "france",
-                    "verbose_name": "France",
+                    "key": "france",
+                    "label": "France",
                     "capital": "Paris",
                 },
             },

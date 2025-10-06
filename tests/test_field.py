@@ -18,8 +18,8 @@ from tests.models import (
 class RegisterFieldTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.paris = City.objects.create(label="Paris", country=CountryChoices.FRANCE)
-        cls.berlin = City.objects.create(label="Berlin", country=CountryChoices.GERMANY)
+        cls.paris = City.objects.create(name="Paris", country=CountryChoices.FRANCE)
+        cls.berlin = City.objects.create(name="Berlin", country=CountryChoices.GERMANY)
 
     def test_can_retrieve_obj(self):
         self.assertEqual(self.paris.country, CountryChoices.FRANCE)
@@ -53,7 +53,7 @@ class RegisterFieldTestCase(TestCase):
         )
 
     def test_default_value(self):
-        city = City.objects.create(label="Ottawa")
+        city = City.objects.create(name="Ottawa")
         self.assertEqual(city.country, CountryChoices.UNITED_STATES)
         self.assertEqual(city._meta.get_field("country").default, "united_states")
 
@@ -61,7 +61,7 @@ class RegisterFieldTestCase(TestCase):
         City._meta.get_field("country").default = CountryInfo(12, capital="Max Capital")
 
         with self.assertRaises(ValidationError), self.assertWarns(UserWarning):
-            City.objects.create(label="Ottawa")
+            City.objects.create(name="Ottawa")
 
     def test_fails_if_fetching_before_registering(self):
         with self.assertRaises(ValueError):
@@ -93,7 +93,7 @@ class RegisterFieldTestCase(TestCase):
         cars_register._key_to_class.pop("hyundai")
 
     def test_annotations(self):
-        Neighborhood.objects.create(label="Montparnasse", city=self.paris)
+        Neighborhood.objects.create(name="Montparnasse", city=self.paris)
 
         neighborhood = Neighborhood.objects.annotate(
             country=models.F("city__country")
