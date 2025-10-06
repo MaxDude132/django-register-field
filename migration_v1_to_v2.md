@@ -8,7 +8,7 @@ especially with Choices taking `label` as being the name to be displayed.
 
 You can either make the change in your codebase, or use the newly implemented `REGISTER_FIELD_KEY_NAME` and `REGISTER_FIELD_LABEL_NAME` to change this behaviour.
 
-For exmaple, if you wanted to keep the old behaviour, you could add these lines to your `settings.py`:
+For example, if you wanted to keep the old behaviour, you could add these lines to your `settings.py`:
 
 ``` python
 REGISTER_FIELD_KEY_NAME="label"
