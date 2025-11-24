@@ -3,7 +3,6 @@ import warnings
 # Django
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
 from .settings import settings
@@ -20,12 +19,15 @@ class UnknownRegisterItem:
         return f"<Unknown register key: {getattr(self, settings.KEY_NAME)}>"
 
 
-@deconstructible
 class Register:
-    def __init__(self, unknown_item_class=None):
+    def __init__(self, unknown_item_class=None, _migration_keys=None):
         self._key_to_class = {}
         self._class_to_key = {}
         self.unknown_item_class = unknown_item_class or UnknownRegisterItem
+        # For migrations: store just the keys that were registered
+        # This allows migrations to validate that values are acceptable
+        # without needing to serialize the actual classes
+        self._migration_keys = _migration_keys or set()
 
     def register(self, klass=None, db_key=None):
         if klass is None:
@@ -57,7 +59,15 @@ class Register:
         try:
             return self._key_to_class[value]
         except (KeyError, TypeError):
-            if not ignore_warning and not isinstance(value, self.unknown_item_class):
+            # During migrations, if we have migration_keys and the value is in them,
+            # don't warn - it's a valid key from when the migration was created
+            in_migration_keys = value in self._migration_keys
+
+            if (
+                not ignore_warning
+                and not isinstance(value, self.unknown_item_class)
+                and not in_migration_keys
+            ):
                 warnings.warn(
                     _(
                         "Value {value} is not registered. The unknown_item_class will be used to return the value."
@@ -109,6 +119,23 @@ class Register:
 
     def __iter__(self):
         return iter(self._key_to_class.values())
+
+    def deconstruct(self):
+        path = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        kwargs = {}
+
+        # Preserve the unknown_item_class if it's not the default
+        if self.unknown_item_class is not UnknownRegisterItem:
+            kwargs["unknown_item_class"] = self.unknown_item_class
+        else:
+            # If using the default, explicitly set to None for clarity
+            kwargs["unknown_item_class"] = None
+
+        # Store the registered keys for migration validation
+        if self._key_to_class:
+            kwargs["_migration_keys"] = set(self._key_to_class.keys())
+
+        return path, [], kwargs
 
 
 class RegisterList(list):

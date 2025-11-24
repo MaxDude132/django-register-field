@@ -63,3 +63,14 @@ class City(models.Model):
 class Neighborhood(models.Model):
     name = models.CharField(max_length=50)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
+
+
+class Region(models.Model):
+    code = RegisterField(choices=CountryChoices, primary_key=True)
+    area_sqkm = models.IntegerField(default=0)
+
+
+class Restaurant(models.Model):
+    name = models.CharField(max_length=100)
+    country = RegisterField(choices=CountryChoices)
+    cuisine = RegisterField(register=food_register, null=True, blank=True)

@@ -130,6 +130,46 @@ class SomeApp(AppConfig):
 
 It does not have to be in the `ready` method, values can be added to the register anywhere, however you should be very careful about where you allow adding values and when. If the value is not available somewhere in the code, it will return the `unknown_item_class` instead of the expected object.
 
+## Data Migrations When Changing Register Choices
+
+When you need to change RegisterField choices (removing, renaming, or modifying choices), you'll need to create a data migration to update existing database values. Here's the recommended approach:
+
+### Using Raw SQL for Data Migrations
+
+When register choices change, the ORM cannot be used for filtering or updating records with old keys because those keys are no longer registered. The standard Django approach is to use raw SQL within a migration:
+
+```python
+from django.db import migrations
+
+def migrate_country_choices(apps, schema_editor):
+    # Use raw SQL with CASE statement to update all mappings in a single query
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE myapp_mymodel
+            SET country_field = CASE country_field
+                WHEN 'uk' THEN 'united_kingdom'
+                WHEN 'usa' THEN 'united_states'
+                ELSE country_field
+            END
+            WHERE country_field IN ('uk', 'usa')
+        """)
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('myapp', '0001_initial'),
+    ]
+    
+    operations = [
+        migrations.RunPython(migrate_country_choices),
+    ]
+```
+
+This approach bypasses Django's field validation and works directly with the database, which is necessary when the old keys are no longer in the register.
+
+### Why Raw SQL is Necessary
+
+The RegisterField's `get_prep_value()` method validates that values exist in the current register. When you try to filter or update using old keys (that have been removed from the register), Django's ORM will raise a `ValidationError`. Raw SQL bypasses this validation and works directly with the database strings.
+
 ## Considerations when removing objects
 
 Removing items from the register requires some consideration. The string in the database is still there unless you create a migration, and it is possible it will cause issues due to the class linked to it not existing anymore. Before version `1.0.8`, this would fail dramatically, giving a ValidationError and stopping anyone from interacting with the database items it was linked to, not even to delete (in most cases). In that case, the only solution would be to add the item back, delete or edit the affected database rows, then remove the item again.

@@ -12,6 +12,7 @@ from tests.models import (
     CarCompanies,
     City,
     CountryChoices,
+    Region,
 )
 
 
@@ -129,3 +130,66 @@ class RegisterFieldTestCase(TestCase):
         # Clean up
         CountryChoices.register.unknown_item_class = UnknownRegisterItem
         CountryChoices.register.register(france, db_key="france")
+
+
+class RegisterFieldAsPrimaryKeyTestCase(TestCase):
+    def test_can_create_with_primary_key(self):
+        region = Region.objects.create(code=CountryChoices.FRANCE, area_sqkm=643801)
+        self.assertEqual(region.code, CountryChoices.FRANCE)
+        self.assertEqual(region.pk, CountryChoices.FRANCE)
+
+    def test_can_retrieve_by_primary_key(self):
+        Region.objects.create(code=CountryChoices.GERMANY, area_sqkm=357022)
+
+        # Retrieve using the register class
+        region = Region.objects.get(pk=CountryChoices.GERMANY)
+        self.assertEqual(region.code, CountryChoices.GERMANY)
+        self.assertEqual(region.area_sqkm, 357022)
+
+        # Also try with code field
+        region = Region.objects.get(code=CountryChoices.GERMANY)
+        self.assertEqual(region.pk, CountryChoices.GERMANY)
+
+    def test_can_filter_by_primary_key(self):
+        Region.objects.create(code=CountryChoices.FRANCE, area_sqkm=643801)
+        Region.objects.create(code=CountryChoices.GERMANY, area_sqkm=357022)
+        Region.objects.create(code=CountryChoices.CANADA, area_sqkm=9984670)
+
+        # Filter by pk
+        regions = Region.objects.filter(pk=CountryChoices.FRANCE)
+        self.assertEqual(regions.count(), 1)
+        self.assertEqual(regions.first().code, CountryChoices.FRANCE)
+
+    def test_can_update_with_primary_key(self):
+        region = Region.objects.create(code=CountryChoices.CANADA, area_sqkm=1000000)
+
+        # Update the area
+        region.area_sqkm = 9984670
+        region.save()
+
+        # Retrieve and verify
+        region.refresh_from_db()
+        self.assertEqual(region.area_sqkm, 9984670)
+        self.assertEqual(region.pk, CountryChoices.CANADA)
+
+    def test_can_delete_with_primary_key(self):
+        region = Region.objects.create(
+            code=CountryChoices.UNITED_STATES, area_sqkm=9833517
+        )
+
+        # Delete
+        region.delete()
+
+        # Verify it's gone
+        self.assertEqual(
+            Region.objects.filter(pk=CountryChoices.UNITED_STATES).count(), 0
+        )
+
+    def test_primary_key_uniqueness(self):
+        Region.objects.create(code=CountryChoices.FRANCE, area_sqkm=643801)
+
+        # Try to create duplicate
+        from django.db import IntegrityError
+
+        with self.assertRaises(IntegrityError):
+            Region.objects.create(code=CountryChoices.FRANCE, area_sqkm=999999)

@@ -1,14 +1,27 @@
 # Django
 from django.contrib import admin
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
+from django.contrib.auth.models import User
+from django.contrib.admin.views.main import ChangeList
 
 # django_register
-from tests.models import City, ContinentChoices, ContinentInfo
+from tests.models import (
+    City,
+    ContinentChoices,
+    ContinentInfo,
+    Restaurant,
+    CountryChoices,
+)
 
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(Restaurant)
+class RestaurantAdmin(admin.ModelAdmin):
+    list_display = ["name", "country", "cuisine"]
 
 
 class AdminTestCase(TestCase):
@@ -81,3 +94,73 @@ class AdminTestCase(TestCase):
                 ("Asia", "Asia"),
             ],
         )
+
+    def test_admin_list_display_with_register_field(self):
+        Restaurant.objects.create(name="Le Petit Bistro", country=CountryChoices.FRANCE)
+
+        restaurant_admin = RestaurantAdmin(Restaurant, admin.site)
+
+        request = RequestFactory().get("/admin/tests/restaurant/")
+        request.user = User.objects.create_user("testuser", "test@test.com", "testpass")
+        request.user.is_staff = True
+        request.user.is_superuser = True
+        request.user.save()
+
+        changelist = ChangeList(
+            request=request,
+            model=Restaurant,
+            list_display=restaurant_admin.list_display,
+            list_display_links=restaurant_admin.list_display_links,
+            list_filter=restaurant_admin.list_filter,
+            date_hierarchy=restaurant_admin.date_hierarchy,
+            search_fields=restaurant_admin.search_fields,
+            list_select_related=restaurant_admin.list_select_related,
+            list_per_page=restaurant_admin.list_per_page,
+            list_max_show_all=restaurant_admin.list_max_show_all,
+            list_editable=restaurant_admin.list_editable,
+            model_admin=restaurant_admin,
+            sortable_by=restaurant_admin.sortable_by,
+            search_help_text=restaurant_admin.search_help_text,
+        )
+
+        results = list(changelist.result_list)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].name, "Le Petit Bistro")
+        self.assertEqual(results[0].country, CountryChoices.FRANCE)
+
+    def test_admin_list_display_none_value(self):
+        Restaurant.objects.create(
+            name="Generic Restaurant", country=CountryChoices.CANADA
+        )
+
+        restaurant_admin = RestaurantAdmin(Restaurant, admin.site)
+        request = RequestFactory().get("/admin/tests/restaurant/")
+        request.user = User.objects.create_user(
+            "testuser2", "test2@test.com", "testpass"
+        )
+        request.user.is_staff = True
+        request.user.is_superuser = True
+        request.user.save()
+
+        from django.contrib.admin.views.main import ChangeList
+
+        changelist = ChangeList(
+            request=request,
+            model=Restaurant,
+            list_display=restaurant_admin.list_display,
+            list_display_links=restaurant_admin.list_display_links,
+            list_filter=restaurant_admin.list_filter,
+            date_hierarchy=restaurant_admin.date_hierarchy,
+            search_fields=restaurant_admin.search_fields,
+            list_select_related=restaurant_admin.list_select_related,
+            list_per_page=restaurant_admin.list_per_page,
+            list_max_show_all=restaurant_admin.list_max_show_all,
+            list_editable=restaurant_admin.list_editable,
+            model_admin=restaurant_admin,
+            sortable_by=restaurant_admin.sortable_by,
+            search_help_text=restaurant_admin.search_help_text,
+        )
+
+        results = list(changelist.result_list)
+        self.assertEqual(len(results), 1)
+        self.assertIsNone(results[0].cuisine)
